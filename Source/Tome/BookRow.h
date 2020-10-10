@@ -36,9 +36,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveBook(ABook *book);
 
+    // Generate books randomly
 	UFUNCTION(BlueprintCallable)
 	void GenerateBooksSimple(int32 count, ABookPool *bookPool = nullptr);
 
+    // Generate books in groups
 	UFUNCTION(BlueprintCallable)
 	void GenerateBooks(ABookPool *bookPool = nullptr);
 
@@ -50,14 +52,17 @@ private:
 	// Remove any books that aren't children
 	void ValidateBookArray();
 
+    // Get book edge positions
 	float GetBoundaryLeft(int32 indexBefore);
 	float GetBoundaryRight(int32 indexBefore);
 
 	// Return world coordinates of book added
 	FVector AddBookRaw(ABook *book, int32 index, float position);
 
+    // Get book at position
 	int32 GetIndex(float position);
 
+    // Add a group of books to the shelf
 	float AddGroup(float position, int32 count, float border, bool goingRight = true, ABookPool *bookPool = nullptr);
 
 public:	

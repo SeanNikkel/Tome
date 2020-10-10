@@ -16,6 +16,7 @@ public:
 	// Sets default values for this actor's properties
 	ABookPool();
 
+    // Get a book from book pool
 	UFUNCTION(BlueprintImplementableEvent)
 	ABook *GetBook();
 

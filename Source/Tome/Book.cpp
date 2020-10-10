@@ -46,11 +46,13 @@ char ABook::GetRandomCharacter(bool punctuation)
 {
 	char possibleCharacters[] = "abcdefghijklmnopqrstuvwxyz .,";
 
-	int32 range = sizeof(possibleCharacters) / sizeof(possibleCharacters[0]) - 2; // -1 for inclusive, -1 for nul
+	int32 range = sizeof(possibleCharacters) / sizeof(possibleCharacters[0]) - 2; // -1 for inclusive, -1 for null
 
+    // Last two are punctuation
 	if (!punctuation)
 		range -= 2;
 
+    // Return random from remaining
 	return possibleCharacters[stream.RandRange(0, range)];
 }
 
@@ -58,15 +60,18 @@ const FString &ABook::GetPage(int32 page)
 {
 	static FString empty = "";
 
+    // Out of bounds
 	if (page < 1 || page > pageCount)
 		return empty;
 
+    // Number of characters to generate
 	float characters = pageLineLength * pageLineCount;
 
 	// Last page could have less characters
 	if (page == pageCount)
 		characters = stream.RandRange(1, characters);
 
+    // Generate the page if doesn't exist
 	if (!pageContents.Contains(page))
 		pageContents.Add(page, GenerateText(characters, pageLineLength));
 
@@ -89,6 +94,7 @@ FString ABook::GenerateText(int32 length, int32 lineSize, bool punctuation)
 	{
 		result += GetRandomCharacter(punctuation);
 
+        // Newlines after every lineSize
 		if (lineSize != 0 && (i + 1) % lineSize == 0)
 			result += '\n';
 	}
@@ -102,8 +108,10 @@ void ABook::WrapString(FString &string, int32 lineLength)
 	int32 currentLength = 0;
 	string = "";
 
+    // For each word
 	for (int i = 0; i < split.Num(); i++)
 	{
+        // If the word fits, add it
 		if (currentLength + split[i].Len() <= lineLength)
 		{
 			string += split[i] + ' ';
@@ -111,13 +119,14 @@ void ABook::WrapString(FString &string, int32 lineLength)
 		}
 		else
 		{
+            // If there is something on this line already, go to next line
 			if (currentLength != 0)
 			{
 				string.TrimEndInline();
 				string += '\n';
 				currentLength = 0;
 			}
-			else
+			else // split this word with a dash, add left side
 			{
 				string += split[i].Left(lineLength - 1) + "-\n";
 				split[i] = split[i].RightChop(lineLength - 1);
@@ -133,10 +142,12 @@ void ABook::TitleCase(FString &string)
 	if (string.Len() == 0)
 		return;
 
+    // Capitalize first letter
 	string[0] = ToUpper(string[0]);
 
 	for (int i = 1; i < string.Len(); i++)
 	{
+        // Capitalize letters after spaces
 		if (string[i - 1] == ' ')
 			string[i] = ToUpper(string[i]);
 	}
@@ -156,6 +167,7 @@ TArray<FString> ABook::DivideString(FString string, const FString &delimiter)
 	FString left;
 	FString right = string;
 
+    // Split string until out of characters
 	while (string.Split(delimiter, &left, &right))
 	{
 		result.Add(left);
@@ -171,15 +183,20 @@ void ABook::RemoveSequentialString(FString &string, TCHAR character)
 	int32 found;
 	int32 index = 0;
 
+    // Find character after index
 	while (string.RightChop(index).FindChar(character, found))
 	{
 		index += found + 1;
 		int32 toRemove = 0;
+
+        // Get all sequential characters
 		while (index < string.Len() && string[index] == character)
 		{
 			toRemove++;
 			index++;
 		}
+
+        // Remove them
 		string.RemoveAt(index - toRemove, toRemove);
 		index -= toRemove;
 	}
@@ -198,14 +215,17 @@ void ABook::SetSeed(int32 seed)
 
 void ABook::GenerateOuterText()
 {
+    // Generate title
 	FString outerContent = GenerateText(stream.RandRange(1, coverMaxLength), 0, false);
 	outerContent.TrimStartAndEndInline();
 	RemoveSequentialString(outerContent, ' ');
 	TitleCase(outerContent);
 
+    // Spine title
 	FrontSpineText->SetText(FText::FromString(outerContent));
 	BackSpineText->SetText(FText::FromString(outerContent));
 
+    // Front title
 	WrapString(outerContent, coverLineLength);
 	CoverText->SetText(FText::FromString(outerContent));
 }
@@ -215,12 +235,15 @@ void ABook::DisplayPage(int32 page, USoundBase *sound)
 	if (page < 1 || page > pageCount)
 		return;
 
+    // Play flip sound
 	if (sound != nullptr)
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), sound, GetActorLocation());
 
+    // Set page text
 	FrontText->SetText(FText::FromString(GetPage(page)));
 	BackText->SetText(FText::FromString(GetPage(page + 1)));
 
+    // Set page numbers
 	FrontPageNum->SetText(FText::FromString(GetPageNumber(page)));
 	BackPageNum->SetText(FText::FromString(GetPageNumber(page + 1)));
 

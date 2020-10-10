@@ -33,9 +33,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DisplayPage(int32 page, USoundBase *sound = nullptr);
 
+    // Event for blueprint to enable physics
 	UFUNCTION(BlueprintImplementableEvent)
 	void EnablePhysics(bool enable);
 
+    // Event for blueprint to teleport the book
 	UFUNCTION(BlueprintImplementableEvent)
 	void PhysicsTeleport(FVector localPos, FRotator localRot);
 
@@ -44,22 +46,31 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+    // Returns a random character
 	char GetRandomCharacter(bool punctuation = true);
 
+    // Get content on a page (generate if doesn't exist)
 	const FString &GetPage(int32 page);
 
+    // Get the page number as a string
 	FString GetPageNumber(int32 page);
 
+    // Generate text for a page
 	FString GenerateText(int32 length, int32 lineSize = 0, bool punctuation = true);
 
+    // Insert newlines so string fits width
 	void WrapString(FString &string, int32 lineLength);
 
+    // Convert string to first letters capitalized
 	void TitleCase(FString &string);
 
+    // Convert char to uppercase
 	char ToUpper(char c);
 
+    // Divide string into array of strings given delimiter
 	TArray<FString> DivideString(FString string, const FString &delimiter);
 
+    // Remove repeated characters in string
 	void RemoveSequentialString(FString &string, TCHAR character);
 
 public:
